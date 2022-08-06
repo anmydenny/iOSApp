@@ -45,7 +45,11 @@ class ViewController: UIViewController {
         let url = "http://www.mocky.io/v2/5d565297300000680030a986"
         WebServiceHandler.shared.getData(method: .get, api: url, params: [:]) { (response:DataResponse<EmployeeDetails>) in
             if let result = response.result.value{
-                self.save(name: result.name ?? "",profile_image: result.profileImage ?? "",company: result.company?.name ?? "")
+                for employee in result{
+                    self.save(name: employee.name ?? "",profile_image: employee.profileImage ?? "",company: employee.company?.name ?? "")
+                }
+                self.fetchData()
+                self.employeeTV.reloadData()
             }else{
                 self.showBasicAlert(title: "", message: response.error?.localizedDescription ?? "")
             }
@@ -70,6 +74,25 @@ class ViewController: UIViewController {
       } catch let error as NSError {
         print("Could not save. \(error), \(error.userInfo)")
       }
+    }
+    
+    func fetchData(){
+
+        let context = (UIApplication.shared.delegate as! AppDelegate).persistentContainer.viewContext
+        let fetchRequest = NSFetchRequest<NSFetchRequestResult>(entityName: "Employee")
+
+        do {
+            let results = try context.fetch(fetchRequest)
+            let  dateCreated = results as! [Employee]
+
+            for _datecreated in dateCreated {
+                employee.append(_datecreated)
+            }
+        }catch let err as NSError {
+            print(err.debugDescription)
+        }
+
+
     }
 
 }
